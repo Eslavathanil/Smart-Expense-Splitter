@@ -274,27 +274,639 @@ Expense creation with:
 }
 ```
 
-### Validation Schemas (Zod)
+### 🔑 Authentication Routes
 
-```typescript
-// Login validation
-const loginSchema = z.object({
-  email: z.string().email("Invalid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+#### `POST /api/auth/signup`
+Create a new user account.
+
+**Request Body:**
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "securePassword123"
+}
+```
+
+**Success Response (201):**
+```json
+{
+  "message": "User created successfully",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "_id": "64abc123def456789",
+    "name": "John Doe",
+    "email": "john@example.com"
+  }
+}
+```
+
+**Error Response (400):**
+```json
+{
+  "error": "User already exists"
+}
+```
+
+---
+
+#### `POST /api/auth/login`
+Authenticate user and get JWT token.
+
+**Request Body:**
+```json
+{
+  "email": "john@example.com",
+  "password": "securePassword123"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "_id": "64abc123def456789",
+    "name": "John Doe",
+    "email": "john@example.com"
+  }
+}
+```
+
+**Error Response (401):**
+```json
+{
+  "error": "Invalid credentials"
+}
+```
+
+---
+
+### 👥 Groups Routes
+
+#### `GET /api/groups`
+Get all groups for authenticated user.
+
+**Response (200):**
+```json
+[
+  {
+    "_id": "64def456ghi789012",
+    "name": "Apartment Expenses",
+    "members": ["Alice", "Bob", "Charlie"],
+    "currency": "USD",
+    "createdBy": "64abc123def456789",
+    "createdAt": "2024-01-15T10:30:00.000Z"
+  }
+]
+```
+
+---
+
+#### `GET /api/groups/:id`
+Get single group with full details.
+
+**Response (200):**
+```json
+{
+  "_id": "64def456ghi789012",
+  "name": "Apartment Expenses",
+  "members": ["Alice", "Bob", "Charlie"],
+  "currency": "USD",
+  "createdBy": {
+    "_id": "64abc123def456789",
+    "name": "John Doe"
+  },
+  "createdAt": "2024-01-15T10:30:00.000Z"
+}
+```
+
+---
+
+#### `POST /api/groups`
+Create a new group.
+
+**Request Body:**
+```json
+{
+  "name": "Trip to Paris",
+  "members": ["Alice", "Bob"],
+  "currency": "USD"
+}
+```
+
+**Response (201):**
+```json
+{
+  "_id": "64xyz789abc012345",
+  "name": "Trip to Paris",
+  "members": ["Alice", "Bob"],
+  "currency": "USD",
+  "createdBy": "64abc123def456789",
+  "createdAt": "2024-01-20T14:00:00.000Z"
+}
+```
+
+---
+
+#### `PUT /api/groups/:id`
+Update group details.
+
+**Request Body:**
+```json
+{
+  "name": "Updated Group Name",
+  "currency": "INR"
+}
+```
+
+---
+
+#### `DELETE /api/groups/:id`
+Delete a group and all associated data.
+
+**Response (200):**
+```json
+{
+  "message": "Group deleted successfully"
+}
+```
+
+---
+
+#### `POST /api/groups/:id/members`
+Add a member to group.
+
+**Request Body:**
+```json
+{
+  "memberName": "Diana"
+}
+```
+
+---
+
+#### `DELETE /api/groups/:id/members/:memberName`
+Remove member from group.
+
+**Response (200):**
+```json
+{
+  "message": "Member removed successfully"
+}
+```
+
+**Error (400) - Member has balance:**
+```json
+{
+  "error": "Cannot remove member with non-zero balance"
+}
+```
+
+---
+
+### 💸 Expenses Routes
+
+#### `GET /api/expenses/group/:groupId`
+Get all expenses for a group.
+
+**Query Parameters:**
+| Param | Type | Description |
+|-------|------|-------------|
+| `startDate` | ISO Date | Filter from date |
+| `endDate` | ISO Date | Filter to date |
+| `category` | String | Filter by category |
+
+**Response (200):**
+```json
+[
+  {
+    "_id": "64exp123abc456",
+    "description": "Dinner at Italian restaurant",
+    "amount": 120.50,
+    "category": "food",
+    "paidBy": "Alice",
+    "splitType": "equal",
+    "splits": {
+      "Alice": 40.17,
+      "Bob": 40.17,
+      "Charlie": 40.16
+    },
+    "createdAt": "2024-01-18T19:30:00.000Z"
+  }
+]
+```
+
+---
+
+#### `POST /api/expenses/group/:groupId`
+Create a new expense.
+
+**Request Body (Equal Split):**
+```json
+{
+  "description": "Groceries",
+  "amount": 85.00,
+  "category": "shopping",
+  "paidBy": "Bob",
+  "splitType": "equal",
+  "splits": {
+    "Alice": 28.33,
+    "Bob": 28.33,
+    "Charlie": 28.34
+  }
+}
+```
+
+**Request Body (Percentage Split):**
+```json
+{
+  "description": "Utilities",
+  "amount": 150.00,
+  "category": "utilities",
+  "paidBy": "Alice",
+  "splitType": "percentage",
+  "splits": {
+    "Alice": 75.00,
+    "Bob": 45.00,
+    "Charlie": 30.00
+  }
+}
+```
+
+**Request Body (Custom Split):**
+```json
+{
+  "description": "Movie tickets",
+  "amount": 45.00,
+  "category": "entertainment",
+  "paidBy": "Charlie",
+  "splitType": "custom",
+  "splits": {
+    "Alice": 15.00,
+    "Bob": 15.00,
+    "Charlie": 15.00
+  }
+}
+```
+
+---
+
+#### `PUT /api/expenses/:id`
+Update an expense.
+
+---
+
+#### `DELETE /api/expenses/:id`
+Delete an expense.
+
+**Response (200):**
+```json
+{
+  "message": "Expense deleted successfully"
+}
+```
+
+---
+
+### 💳 Settlements Routes
+
+#### `GET /api/settlements/group/:groupId`
+Calculate optimal settlements (who owes whom).
+
+**Response (200):**
+```json
+{
+  "balances": {
+    "Alice": 45.50,
+    "Bob": -30.25,
+    "Charlie": -15.25
+  },
+  "settlements": [
+    {
+      "from": "Bob",
+      "to": "Alice",
+      "amount": 30.25
+    },
+    {
+      "from": "Charlie",
+      "to": "Alice",
+      "amount": 15.25
+    }
+  ]
+}
+```
+
+---
+
+#### `POST /api/settlements/group/:groupId/settle`
+Record a settlement payment.
+
+**Request Body:**
+```json
+{
+  "from": "Bob",
+  "to": "Alice",
+  "amount": 30.25
+}
+```
+
+**Response (201):**
+```json
+{
+  "_id": "64set789xyz012",
+  "groupId": "64def456ghi789012",
+  "from": "Bob",
+  "to": "Alice",
+  "amount": 30.25,
+  "createdAt": "2024-01-20T15:45:00.000Z"
+}
+```
+
+---
+
+#### `GET /api/settlements/group/:groupId/history`
+Get settlement history.
+
+**Response (200):**
+```json
+[
+  {
+    "_id": "64set789xyz012",
+    "from": "Bob",
+    "to": "Alice",
+    "amount": 30.25,
+    "createdAt": "2024-01-20T15:45:00.000Z"
+  }
+]
+```
+
+---
+
+#### `DELETE /api/settlements/:settlementId`
+Undo a settlement (within 15 minutes).
+
+**Response (200):**
+```json
+{
+  "message": "Settlement undone successfully"
+}
+```
+
+**Error (400) - Time limit exceeded:**
+```json
+{
+  "error": "Settlement can only be undone within 15 minutes"
+}
+```
+
+---
+
+### 👤 Users Routes
+
+#### `GET /api/users/me`
+Get current user profile.
+
+**Response (200):**
+```json
+{
+  "_id": "64abc123def456789",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "createdAt": "2024-01-10T08:00:00.000Z"
+}
+```
+
+---
+
+#### `PUT /api/users/me`
+Update user profile.
+
+**Request Body:**
+```json
+{
+  "name": "John Smith"
+}
+```
+
+---
+
+#### `PUT /api/users/me/password`
+Change password.
+
+**Request Body:**
+```json
+{
+  "currentPassword": "oldPassword123",
+  "newPassword": "newSecurePassword456"
+}
+```
+
+---
+
+## 🗄 Database Models
+
+### User Schema
+```javascript
+const userSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
-// Expense validation
-const expenseSchema = z.object({
-  description: z.string().min(1, "Description required"),
-  amount: z.number().positive("Amount must be positive"),
-  category: z.string(),
-  paidBy: z.string(),
-  splitType: z.enum(["equal", "percentage", "custom"]),
-  splits: z.record(z.number()),
+// Password hashing pre-save hook
+userSchema.pre('save', async function(next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+  next();
+});
+```
+
+### Group Schema
+```javascript
+const groupSchema = new Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  members: [{
+    type: String,
+    required: true
+  }],
+  currency: {
+    type: String,
+    enum: ['USD', 'INR'],
+    default: 'USD'
+  },
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+```
+
+### Expense Schema
+```javascript
+const expenseSchema = new Schema({
+  groupId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Group',
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  amount: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  category: {
+    type: String,
+    default: 'other'
+  },
+  paidBy: {
+    type: String,
+    required: true
+  },
+  splitType: {
+    type: String,
+    enum: ['equal', 'percentage', 'custom'],
+    default: 'equal'
+  },
+  splits: {
+    type: Map,
+    of: Number
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+```
+
+### Settlement Schema
+```javascript
+const settlementSchema = new Schema({
+  groupId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Group',
+    required: true
+  },
+  from: {
+    type: String,
+    required: true
+  },
+  to: {
+    type: String,
+    required: true
+  },
+  amount: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 ```
 
 ---
+
+## 🛡 Middleware
+
+### Auth Middleware (`auth.js`)
+```javascript
+const auth = async (req, res, next) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+    
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+    
+    req.user = user;
+    req.userId = user._id;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+};
+```
+
+### Validation Middleware (`validate.js`)
+```javascript
+const validate = (schema) => async (req, res, next) => {
+  try {
+    await schema.parseAsync(req.body);
+    next();
+  } catch (error) {
+    res.status(400).json({ 
+      error: 'Validation failed',
+      details: error.errors 
+    });
+  }
+};
+```
+
+---
+
+## ⚠️ Error Handling
+
+### Standard Error Response
+```json
+{
+  "error": "Error message here",
+  "details": {} // Optional additional info
+}
+```
+
+### HTTP Status Codes
+| Code | Meaning |
+|------|---------|
+| 200 | Success |
+| 201 | Created |
+| 400 | Bad Request (validation error) |
+| 401 | Unauthorized (auth required) |
+| 403 | Forbidden (no permission) |
+| 404 | Not Found |
+| 500 | Internal Server Error |
+
+---
+
 
 ## ⚙️ Backend Documentation
 
