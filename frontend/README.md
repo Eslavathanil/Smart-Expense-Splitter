@@ -1,13 +1,6 @@
 # 💰 SplitSmart - Expense Splitting Application
 
 A full-stack MERN application for splitting expenses among groups of friends, roommates, or travel companions. Track shared expenses, calculate balances, and settle debts with ease.
-
-![SplitSmart](https://img.shields.io/badge/SplitSmart-Expense%20Splitter-teal)
-![React](https://img.shields.io/badge/React-18.3-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
-![Node.js](https://img.shields.io/badge/Node.js-Express-green)
-![MongoDB](https://img.shields.io/badge/MongoDB-Database-green)
-
 ---
 
 ## 📋 Table of Contents
@@ -53,7 +46,6 @@ A full-stack MERN application for splitting expenses among groups of friends, ro
 ### Frontend
 ```
 React 18          → UI Framework
-TypeScript        → Type Safety
 Vite              → Build Tool & Dev Server
 Tailwind CSS      → Utility-First Styling
 shadcn/ui         → Accessible Component Library
@@ -159,7 +151,7 @@ splitsmart/
 ### Prerequisites
 - **Node.js** v18+ ([Install with nvm](https://github.com/nvm-sh/nvm))
 - **MongoDB** (local or [MongoDB Atlas](https://www.mongodb.com/atlas))
-- **npm** or **yarn**
+- **npm** 
 
 ### Installation
 
@@ -179,12 +171,6 @@ npm install
 
 # Create environment file
 cp .env.example .env
-
-# Edit .env with your configuration:
-# MONGODB_URI=mongodb://localhost:27017/splitsmart
-# JWT_SECRET=your-super-secret-key-here
-# PORT=5000
-# FRONTEND_URL=http://localhost:5173
 
 # Start development server
 npm run dev
