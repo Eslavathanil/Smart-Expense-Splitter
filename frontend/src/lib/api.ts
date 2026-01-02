@@ -1,5 +1,6 @@
 // API Configuration - Update this URL to your Express backend
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+//const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_BASE_URL = "https://smart-expense-splitter-tjwu.onrender.com/api";
 
 // Helper to get auth token
 const getToken = (): string | null => {
