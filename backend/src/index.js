@@ -1,3 +1,5 @@
+// backend/src/index.js
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -11,53 +13,76 @@ const userRoutes = require('./routes/users');
 
 const app = express();
 
-// Middleware
+// =====================
+// CORS Configuration
+// =====================
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:8080',
+  'http://localhost:3000',
+  process.env.FRONTEND_URL, // Frontend deployed URL
+].filter(Boolean);
+
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, etc.)
+    // Allow requests with no origin (curl, mobile apps, Postman)
     if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:5173',
-      'http://localhost:8080',
-      'http://localhost:3000',
-      process.env.FRONTEND_URL
-    ].filter(Boolean);
-    
+
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(null, true); // Allow all origins in development
+      callback(null, true); // Allow all origins in development / optional
     }
   },
   credentials: true,
 }));
-app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/splitsmart')
+// =====================
+// Middleware
+// =====================
+app.use(express.json()); // Parse JSON requests
+
+// =====================
+// MongoDB Connection
+// =====================
+const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/splitsmart';
+
+mongoose.connect(mongoUri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
   .then(() => console.log('✅ Connected to MongoDB'))
-  .catch((err) => console.error('❌ MongoDB connection error:', err));
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Routes
+// =====================
+// API Routes
+// =====================
 app.use('/api/auth', authRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/settlements', settlementRoutes);
 app.use('/api/users', userRoutes);
 
-// Health check
+// =====================
+// Health Check
+// =====================
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Error handling middleware
+// =====================
+// Error Handling Middleware
+// =====================
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('❌ Server Error:', err.stack);
   res.status(500).json({ message: 'Something went wrong!' });
 });
 
+// =====================
+// Start Server
+// =====================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌐 Backend URL: ${process.env.FRONTEND_URL}`);
 });
