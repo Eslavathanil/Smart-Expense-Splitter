@@ -2,6 +2,10 @@
 
 A full-stack MERN application for splitting expenses among groups of friends, roommates, or travel companions. Track shared expenses, calculate balances, and settle debts with ease.
 ---
+## 🌐 Live Demo
+
+🚀 **Live Application URL:**  
+https://smart-expense-splitter-1-chot.onrender.com/
 
 ## 📋 Table of Contents
 
