@@ -228,7 +228,7 @@ Create a new user account.
 #### `POST /api/auth/login`
 Authenticate user and get JWT token.
 
-
+---
 ### 👥 Groups Routes
 
 #### `GET /api/groups`
@@ -239,7 +239,6 @@ Get all groups for authenticated user.
 #### `GET /api/groups/:id`
 Get single group with full details.
 
----
 
 #### `POST /api/groups`
 Create a new group.
@@ -257,6 +256,7 @@ Add a member to group.
 #### `DELETE /api/groups/:id/members/:memberName`
 Remove member from group.
 
+---
 ### 💸 Expenses Routes
 
 #### `GET /api/expenses/group/:groupId`
@@ -272,6 +272,7 @@ Update an expense.
 #### `DELETE /api/expenses/:id`
 Delete an expense.
 
+---
 ### 💳 Settlements Routes
 
 #### `GET /api/settlements/group/:groupId`
@@ -287,12 +288,11 @@ Get settlement history.
 #### `DELETE /api/settlements/:settlementId`
 Undo a settlement (within 15 minutes).
 
-
+---
 ### 👤 Users Routes
 
 #### `GET /api/users/me`
 Get current user profile.
-
 
 #### `PUT /api/users/me`
 Update user profile.
@@ -300,7 +300,7 @@ Update user profile.
 #### `PUT /api/users/me/password`
 Change password.
 
-
+---
 ## 🗄 Database Models
 
 ### User Schema
@@ -313,6 +313,7 @@ Change password.
 
 ### Settlement Schema
 
+---
 ### HTTP Status Codes
 | Code | Meaning |
 |------|---------|
@@ -325,8 +326,6 @@ Change password.
 | 500 | Internal Server Error |
 
 ---
-
-
 ## ⚙️ Backend Documentation
 
 ### Server Architecture
